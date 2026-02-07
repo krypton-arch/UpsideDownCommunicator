@@ -40,6 +40,10 @@ class CommunicatorViewModel : ViewModel() {
     private val _isFlashing = MutableStateFlow(false)
     val isFlashing: StateFlow<Boolean> = _isFlashing.asStateFlow()
     
+    // Currently active letter (for Stranger Things style display)
+    private val _activeLetter = MutableStateFlow<Char?>(null)
+    val activeLetter: StateFlow<Char?> = _activeLetter.asStateFlow()
+    
     // Status message for display
     private val _statusMessage = MutableStateFlow("SIGNAL READY")
     val statusMessage: StateFlow<String> = _statusMessage.asStateFlow()
@@ -114,51 +118,58 @@ class CommunicatorViewModel : ViewModel() {
     
     /**
      * Encode the current message and start transmission
+     * Uses Stranger Things style - lights up individual letters
      */
     fun encodeAndTransmit() {
         if (_isPossessed.value) return
         if (_currentMessage.value.isBlank()) return
         if (_isTransmitting.value) return
         
-        val signals = MorseCodeEncoder.encode(_currentMessage.value)
-        if (signals.isEmpty()) return
-        
-        _signalOutput.value = signals
-        startTransmission(signals)
+        // Start letter-by-letter transmission (Stranger Things style)
+        startLetterTransmission(_currentMessage.value.uppercase())
     }
     
     /**
-     * Start transmitting the encoded signal
+     * Start transmitting letters one by one (like Christmas lights)
      */
-    private fun startTransmission(signals: List<SignalUnit>) {
+    private fun startLetterTransmission(message: String) {
         transmissionJob?.cancel()
         transmissionJob = viewModelScope.launch {
             _isTransmitting.value = true
             _statusMessage.value = "TRANSMITTING..."
             
-            for (signal in signals) {
+            // Filter to only valid characters
+            val validChars = message.filter { it.isLetter() || it.isDigit() || it.isWhitespace() }
+            
+            for (char in validChars) {
                 if (_isPossessed.value) {
-                    // Transmission interrupted by possession
                     break
                 }
                 
-                when (signal) {
-                    is SignalUnit.Dot, is SignalUnit.Dash -> {
-                        // Flash on
-                        _isFlashing.value = true
-                        delay(signal.durationMs)
-                        // Flash off
-                        _isFlashing.value = false
-                    }
-                    is SignalUnit.SymbolGap, is SignalUnit.LetterGap, is SignalUnit.WordGap -> {
-                        // Already off, just wait
-                        delay(signal.durationMs)
-                    }
+                if (char.isWhitespace()) {
+                    // Word gap - brief pause, no light
+                    _activeLetter.value = null
+                    _isFlashing.value = false
+                    delay(800L)
+                } else {
+                    // Light up this letter
+                    _activeLetter.value = char.uppercaseChar()
+                    _isFlashing.value = true
+                    
+                    // Hold the letter lit for visibility
+                    delay(600L)
+                    
+                    // Brief flicker off
+                    _isFlashing.value = false
+                    _activeLetter.value = null
+                    delay(300L)
                 }
             }
             
             _isTransmitting.value = false
             _isFlashing.value = false
+            _activeLetter.value = null
+            
             if (!_isPossessed.value) {
                 _statusMessage.value = "TRANSMISSION COMPLETE"
                 delay(2000)

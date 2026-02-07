@@ -63,6 +63,7 @@ fun MainScreen(
     val currentMessage by viewModel.currentMessage.collectAsState()
     val isTransmitting by viewModel.isTransmitting.collectAsState()
     val isFlashing by viewModel.isFlashing.collectAsState()
+    val activeLetter by viewModel.activeLetter.collectAsState()
     val statusMessage by viewModel.statusMessage.collectAsState()
     
     val focusManager = LocalFocusManager.current
@@ -211,11 +212,12 @@ fun MainScreen(
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            // Signal Display
+            // Signal Display - Stranger Things style Christmas lights
             SignalDisplay(
                 isFlashing = isFlashing,
                 isTransmitting = isTransmitting,
-                isPossessed = isPossessed
+                isPossessed = isPossessed,
+                activeLetter = activeLetter
             )
             
             Spacer(modifier = Modifier.height(16.dp))
