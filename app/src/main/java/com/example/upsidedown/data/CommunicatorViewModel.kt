@@ -128,52 +128,64 @@ class CommunicatorViewModel : ViewModel() {
     
     /**
      * Encode the current message and start transmission
-     * Uses Stranger Things style - lights up individual letters
+     * Uses Morse code - dots and dashes must be deciphered
      */
     fun encodeAndTransmit() {
         if (_isPossessed.value) return
         if (_currentMessage.value.isBlank()) return
         if (_isTransmitting.value) return
         
-        // Start letter-by-letter transmission (Stranger Things style)
-        startLetterTransmission(_currentMessage.value.uppercase())
+        // Encode to Morse code signals
+        val signals = MorseCodeEncoder.encode(_currentMessage.value)
+        if (signals.isEmpty()) return
+        
+        _signalOutput.value = signals
+        startMorseTransmission(signals)
     }
     
     /**
-     * Start transmitting letters one by one (like Christmas lights)
+     * Start transmitting Morse code signals (dots and dashes)
+     * Requires deciphering - no plain letters shown
      */
-    private fun startLetterTransmission(message: String) {
+    private fun startMorseTransmission(signals: List<SignalUnit>) {
         transmissionJob?.cancel()
         transmissionJob = viewModelScope.launch {
             _isTransmitting.value = true
             _statusMessage.value = "TRANSMITTING..."
+            _activeLetter.value = null
             
-            // Filter to only valid characters
-            val validChars = message.filter { it.isLetter() || it.isDigit() || it.isWhitespace() }
-            
-            for (char in validChars) {
+            for (signal in signals) {
                 if (_isPossessed.value) {
                     break
                 }
                 
-                if (char.isWhitespace()) {
-                    // Word gap - brief pause, no light
-                    _activeLetter.value = null
-                    _isFlashing.value = false
-                    delay(800L)
-                } else {
-                    // Light up this letter and play sound
-                    _activeLetter.value = char.uppercaseChar()
-                    _isFlashing.value = true
-                    soundPlayer?.playLetterBeep()
-                    
-                    // Hold the letter lit for visibility
-                    delay(600L)
-                    
-                    // Brief flicker off
-                    _isFlashing.value = false
-                    _activeLetter.value = null
-                    delay(300L)
+                when (signal) {
+                    is SignalUnit.Dot -> {
+                        // Short flash + short beep
+                        _isFlashing.value = true
+                        soundPlayer?.playDot()
+                        delay(signal.durationMs)
+                        _isFlashing.value = false
+                    }
+                    is SignalUnit.Dash -> {
+                        // Long flash + long beep
+                        _isFlashing.value = true
+                        soundPlayer?.playDash()
+                        delay(signal.durationMs)
+                        _isFlashing.value = false
+                    }
+                    is SignalUnit.SymbolGap -> {
+                        // Brief pause between dots/dashes
+                        delay(signal.durationMs)
+                    }
+                    is SignalUnit.LetterGap -> {
+                        // Pause between letters
+                        delay(signal.durationMs)
+                    }
+                    is SignalUnit.WordGap -> {
+                        // Long pause between words
+                        delay(signal.durationMs)
+                    }
                 }
             }
             

@@ -13,14 +13,15 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,7 +30,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -41,30 +41,17 @@ import com.example.upsidedown.ui.theme.PhosphorGreen
 import com.example.upsidedown.ui.theme.PhosphorGreenDim
 import com.example.upsidedown.ui.theme.TerminalBlack
 
-// Christmas light colors like in Stranger Things
-private val lightColors = listOf(
-    Color(0xFFFF0000), // Red
-    Color(0xFFFFFF00), // Yellow
-    Color(0xFF00FF00), // Green
-    Color(0xFF0088FF), // Blue
-    Color(0xFFFF00FF), // Magenta
-    Color(0xFFFF8800), // Orange
-    Color(0xFF00FFFF), // Cyan
-    Color(0xFFFF0088), // Pink
-)
-
 /**
- * Stranger Things style alphabet display
- * Letters are arranged in rows like Christmas lights on a wall
- * Individual letters light up to spell messages
+ * Morse code signal display
+ * Shows flashing light for dots and dashes - requires deciphering
+ * No plain letters shown
  */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SignalDisplay(
     isFlashing: Boolean,
     isTransmitting: Boolean,
     isPossessed: Boolean,
-    activeLetter: Char? = null,
+    activeLetter: Char? = null, // Kept for compatibility but not used
     modifier: Modifier = Modifier
 ) {
     // Flicker animation for possessed mode
@@ -82,197 +69,177 @@ fun SignalDisplay(
         label = "flicker"
     )
     
+    // Glow pulse for active signal
+    val glowPulse by infiniteTransition.animateFloat(
+        initialValue = 0.5f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(300, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "glow_pulse"
+    )
+    
+    val signalColor by animateColorAsState(
+        targetValue = when {
+            isPossessed -> CorruptionRed
+            isFlashing -> PhosphorGreen
+            else -> PhosphorGreenDim.copy(alpha = 0.3f)
+        },
+        animationSpec = tween(50),
+        label = "signal_color"
+    )
+    
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp),
+            .padding(horizontal = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Label
         Text(
-            text = "[ DIMENSIONAL INTERFACE ]",
+            text = "[ SIGNAL TRANSMISSION ]",
             style = MaterialTheme.typography.labelMedium,
             color = if (isPossessed) CorruptionRed else PhosphorGreenDim
         )
         
         Spacer(modifier = Modifier.height(12.dp))
         
-        // Alphabet wall - like Joyce's Christmas lights
+        // Main signal display area
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .border(2.dp, if (isPossessed) CorruptionRed else PhosphorGreenDim)
-                .background(Color(0xFF0D0D0D))
-                .padding(12.dp)
+                .height(180.dp)
+                .border(3.dp, if (isPossessed) CorruptionRed else PhosphorGreenDim)
+                .background(TerminalBlack),
+            contentAlignment = Alignment.Center
         ) {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+            // Glow effect behind the signal
+            if (isFlashing && !isPossessed) {
+                Box(
+                    modifier = Modifier
+                        .size(120.dp)
+                        .blur(40.dp)
+                        .background(PhosphorGreen.copy(alpha = 0.6f * glowPulse))
+                )
+            }
+            
+            // The signal light
+            Box(
+                modifier = Modifier
+                    .size(if (isFlashing) 100.dp else 80.dp)
+                    .clip(CircleShape)
+                    .background(signalColor.copy(alpha = flickerAlpha))
+                    .border(
+                        width = 4.dp,
+                        color = if (isFlashing) signalColor else PhosphorGreenDim,
+                        shape = CircleShape
+                    ),
+                contentAlignment = Alignment.Center
             ) {
-                // Row 1: A-I
-                AlphabetRow(
-                    letters = "ABCDEFGHI",
-                    activeLetter = activeLetter,
-                    isPossessed = isPossessed,
-                    flickerAlpha = flickerAlpha
-                )
+                // Inner bright core when lit
+                if (isFlashing) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.8f * flickerAlpha))
+                    )
+                }
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(12.dp))
+        
+        // Legend - Morse code reference
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(1.dp, PhosphorGreenDim)
+                .background(TerminalBlack)
+                .padding(8.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Dot indicator
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(12.dp)
+                            .clip(CircleShape)
+                            .background(PhosphorGreen)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "SHORT = DOT (.)",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = PhosphorGreenDim
+                    )
+                }
                 
-                // Row 2: J-R
-                AlphabetRow(
-                    letters = "JKLMNOPQR",
-                    activeLetter = activeLetter,
-                    isPossessed = isPossessed,
-                    flickerAlpha = flickerAlpha
-                )
-                
-                // Row 3: S-Z + numbers hint
-                AlphabetRow(
-                    letters = "STUVWXYZ",
-                    activeLetter = activeLetter,
-                    isPossessed = isPossessed,
-                    flickerAlpha = flickerAlpha
-                )
+                // Dash indicator
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .width(24.dp)
+                            .height(12.dp)
+                            .clip(RoundedCornerShape(2.dp))
+                            .background(PhosphorGreen)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "LONG = DASH (-)",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = PhosphorGreenDim
+                    )
+                }
             }
         }
         
         Spacer(modifier = Modifier.height(8.dp))
         
-        // Status indicator
+        // Status
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp)
                 .border(1.dp, if (isPossessed) CorruptionRed else PhosphorGreenDim)
                 .background(TerminalBlack)
                 .padding(8.dp),
             contentAlignment = Alignment.Center
         ) {
             val statusText = when {
-                isPossessed -> ">>> INTERFERENCE <<<"
-                isTransmitting && activeLetter != null -> "RECEIVING: $activeLetter"
-                isTransmitting -> "SIGNAL INCOMING..."
-                else -> "AWAITING TRANSMISSION"
+                isPossessed -> ">>> SIGNAL CORRUPTED <<<"
+                isTransmitting && isFlashing -> "■ SIGNAL ACTIVE ■"
+                isTransmitting -> "TRANSMITTING..."
+                else -> "AWAITING SIGNAL"
             }
             
             Text(
                 text = statusText,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontWeight = if (isFlashing) FontWeight.Bold else FontWeight.Normal
+                ),
                 color = when {
                     isPossessed -> CorruptionRed
-                    isTransmitting -> PhosphorGreen
+                    isFlashing -> PhosphorGreen
+                    isTransmitting -> Amber
                     else -> PhosphorGreenDim
                 },
                 textAlign = TextAlign.Center
             )
         }
-    }
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun AlphabetRow(
-    letters: String,
-    activeLetter: Char?,
-    isPossessed: Boolean,
-    flickerAlpha: Float
-) {
-    FlowRow(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        letters.forEachIndexed { index, letter ->
-            ChristmasLight(
-                letter = letter,
-                isActive = activeLetter == letter,
-                lightColor = lightColors[index % lightColors.size],
-                isPossessed = isPossessed,
-                flickerAlpha = flickerAlpha
-            )
-        }
-    }
-}
-
-@Composable
-private fun ChristmasLight(
-    letter: Char,
-    isActive: Boolean,
-    lightColor: Color,
-    isPossessed: Boolean,
-    flickerAlpha: Float
-) {
-    val actualColor = when {
-        isPossessed -> CorruptionRed
-        isActive -> lightColor
-        else -> Color.Gray.copy(alpha = 0.3f)
-    }
-    
-    val glowColor by animateColorAsState(
-        targetValue = if (isActive) lightColor else Color.Transparent,
-        animationSpec = tween(100),
-        label = "glow"
-    )
-    
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(horizontal = 2.dp)
-    ) {
-        // The light bulb
-        Box(
-            contentAlignment = Alignment.Center
-        ) {
-            // Glow effect when active
-            if (isActive && !isPossessed) {
-                Box(
-                    modifier = Modifier
-                        .size(32.dp)
-                        .blur(12.dp)
-                        .clip(CircleShape)
-                        .background(glowColor.copy(alpha = 0.8f * flickerAlpha))
-                )
-            }
-            
-            // The bulb itself
-            Box(
-                modifier = Modifier
-                    .size(if (isActive) 28.dp else 24.dp)
-                    .clip(CircleShape)
-                    .background(
-                        if (isActive) actualColor.copy(alpha = flickerAlpha)
-                        else actualColor
-                    )
-                    .border(
-                        width = 2.dp,
-                        color = if (isActive) actualColor else Color.DarkGray,
-                        shape = CircleShape
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                // Inner bright spot when lit
-                if (isActive) {
-                    Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.8f))
-                    )
-                }
-            }
-        }
         
-        // Letter label below the light
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        // Warning label
         Text(
-            text = letter.toString(),
-            style = MaterialTheme.typography.labelSmall.copy(
-                fontSize = 12.sp,
-                fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal
-            ),
-            color = if (isActive) {
-                if (isPossessed) CorruptionRed else PhosphorGreen
-            } else {
-                PhosphorGreenDim.copy(alpha = 0.6f)
-            }
+            text = "⚠ DECIPHER MORSE CODE TO READ MESSAGE ⚠",
+            style = MaterialTheme.typography.labelSmall,
+            color = Amber.copy(alpha = 0.8f),
+            textAlign = TextAlign.Center
         )
     }
 }
