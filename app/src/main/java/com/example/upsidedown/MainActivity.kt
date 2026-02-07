@@ -15,6 +15,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.upsidedown.data.CommunicatorViewModel
+import com.example.upsidedown.data.MorseSoundPlayer
 import com.example.upsidedown.data.ShakeDetector
 import com.example.upsidedown.ui.screens.MainScreen
 import com.example.upsidedown.ui.theme.UpsidedownTheme
@@ -27,6 +28,7 @@ class MainActivity : ComponentActivity() {
     
     private var shakeDetector: ShakeDetector? = null
     private var vibrator: Vibrator? = null
+    private var soundPlayer: MorseSoundPlayer? = null
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,9 +52,15 @@ class MainActivity : ComponentActivity() {
             getSystemService(VIBRATOR_SERVICE) as Vibrator
         }
         
+        // Initialize sound player for Morse code beeps
+        soundPlayer = MorseSoundPlayer(this)
+        
         setContent {
             UpsidedownTheme {
                 val communicatorViewModel: CommunicatorViewModel = viewModel()
+                
+                // Set sound player to ViewModel
+                soundPlayer?.let { communicatorViewModel.setSoundPlayer(it) }
                 
                 // Initialize shake detector with callback
                 if (shakeDetector == null) {

@@ -16,6 +16,9 @@ import kotlinx.coroutines.launch
  */
 class CommunicatorViewModel : ViewModel() {
     
+    // Sound player for Morse code beeps (set from MainActivity)
+    private var soundPlayer: MorseSoundPlayer? = null
+    
     // Sanity level: 100 = fully sane, 0 = possessed
     private val _sanityLevel = MutableStateFlow(100)
     val sanityLevel: StateFlow<Int> = _sanityLevel.asStateFlow()
@@ -55,6 +58,13 @@ class CommunicatorViewModel : ViewModel() {
     // Configuration
     private val sanityDrainIntervalMs = 1000L // Drain 1 point per second
     private val possessionDurationMs = 30_000L // 30 seconds of possession before auto-recovery
+    
+    /**
+     * Set the sound player (called from MainActivity)
+     */
+    fun setSoundPlayer(player: MorseSoundPlayer) {
+        soundPlayer = player
+    }
     
     init {
         startSanityDrain()
@@ -152,9 +162,10 @@ class CommunicatorViewModel : ViewModel() {
                     _isFlashing.value = false
                     delay(800L)
                 } else {
-                    // Light up this letter
+                    // Light up this letter and play sound
                     _activeLetter.value = char.uppercaseChar()
                     _isFlashing.value = true
+                    soundPlayer?.playLetterBeep()
                     
                     // Hold the letter lit for visibility
                     delay(600L)
