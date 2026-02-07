@@ -11,9 +11,9 @@
      COMMUNICATOR v1.983
 ```
 
-**A Stranger Things inspired crisis communication app**
+**A Stranger Things inspired Morse Code Transmitter**
 
-*When the lights flicker and the phones go dead, spell out your message the old way.*
+*When the lights flicker and the phones go dead, signal your message the old way.*
 
 ### 📥 [Download APK](UpsideDownCommunicator.apk)
 
@@ -21,36 +21,51 @@
 
 ---
 
-## ✨ Features
+## 📖 How It Works (The Process)
 
-### 🎄 Christmas Lights Alphabet (Stranger Things Style)
-- **Alphabet wall visualization** - Letters A-Z arranged like Joyce's Christmas lights
-- **Multi-colored bulbs** - Red, Yellow, Green, Blue, Magenta, Orange, Cyan, Pink
-- **Letter-by-letter transmission** - Watch each letter glow as your message is spelled out
-- **Audio beeps** - 800Hz telegraph-style sounds accompany each letter
+This application turns your smartphone into a retro-style crisis communicator device. It converts standard text into Morse code signals using light and sound, while simulating the psychological stress of the "Upside Down" dimension.
 
-### 🧠 Mind Flayer Mode
-| Feature | Description |
-|---------|-------------|
-| **Sanity Meter** | Drains 1% per second from 100% → 0% |
-| **Possessed Mode** | Screen flips 180°, UI glitches, red corruption |
-| **Recovery** | Shake device for instant recovery (with vibration) |
-| **Auto-Recovery** | Wait 30 seconds if you can't shake |
+### 1. The Input Phase
+- **User Action**: You type a plain text message (e.g., "STAY HERE") into the terminal interface.
+- **System**: The app accepts alphanumeric characters and standardizes them for transmission.
 
-### 📺 Retro 1983 Aesthetic
-- CRT scanline overlay with subtle flicker
-- Phosphor green (#33FF00) terminal colors  
-- Monospace typography throughout
-- Hard-edged buttons (no modern rounded corners)
-- Animated splash screen with glowing logo
+### 2. The Encoding Process
+- **Logic**: The `MorseCodeEncoder` takes your text and converts it into a sequence of signal units based on International Morse Code standards.
+- **Signal Units**:
+  - **Dot (.)**: 1 unit duration
+  - **Dash (-)**: 3 units duration
+  - **Gaps**: Pauses between dots, letters, and words to ensure readability.
+
+### 3. The Transmission
+- **Visual**: A central signal light flashes in sync with the code.
+  - **Bright Green Flash**: Active signal (Dot or Dash).
+  - **Dim/Off**: Gaps/Silence.
+- **Audio**: An 800Hz sine wave synthesizer beeps in perfect synchronization with the light flashes.
+- **Status**: The terminal displays "TRANSMITTING..." and locks input until the message is complete.
+
+### 4. The Mind Flayer Mechanic (Sanity System)
+The app simulates the draining effect of the Upside Down environment:
+- **Sanity Drain**: Your "Sanity Meter" drops by **1% every second** automatically.
+- **The Corruption**:
+  - **< 50%**: "INTERFERENCE DETECTED" warnings appear.
+  - **< 20%**: "SYSTEM CRITICAL" alerts.
+  - **0% (POSSESSED)**: The system becomes corrupted.
+    - **Effect**: Transmission is blocked. The UI flickers red ("CorruptionRed"). Status changes to "SIGNAL CORRUPTED".
+- **Recovery**:
+  - **Manual**: Physically **shake your device** to snap out of possession and restore 100% sanity.
+  - **Auto**: If you cannot shake, the system will reboot/recover automatically after 30 seconds.
 
 ---
 
-## 📱 Screenshots
+## ✨ Features
 
-| Splash Screen | Main Interface | Transmitting |
-|---------------|----------------|--------------|
-| Stranger Things style loading | Alphabet wall + Sanity meter | Letters light up sequentially |
+- **Authentic Morse Engine**: Proper timing for dots (200ms), dashes (600ms), and spacing.
+- **Retro 1983 Aesthetic**:
+  - Phosphor green (#33FF00) terminal visuals.
+  - CRT scanline effects.
+  - Monospace typography.
+- **Immersive Mechanics**: "Possession" mode requires physical interaction (shaking) to fix.
+- **Reference Guide**: Built-in Morse code cheat sheet displayed on-screen.
 
 ---
 
@@ -58,12 +73,27 @@
 
 | Component | Technology |
 |-----------|------------|
-| Language | Kotlin |
-| UI Framework | Jetpack Compose + Material3 |
-| Architecture | MVVM with StateFlow |
-| Audio | Synthesized sine wave (no external files) |
-| Min SDK | 24 (Android 7.0) |
-| Target SDK | 36 |
+| **Language** | Kotlin |
+| **UI** | Jetpack Compose (Material3) |
+| **Architecture** | MVVM (Model-View-ViewModel) |
+| **State Management** | Kotlin Coroutines & StateFlow |
+| **Audio** | AudioTrack API (Real-time Synthesis) |
+| **Sensors** | Accelerometer (for Shake Detection) |
+
+---
+
+## 🚀 Quick Start
+
+### Installation
+1. Download `UpsideDownCommunicator.apk` from this repository.
+2. Install on your Android device (Requires Android 7.0+).
+
+### Usage
+1. **Launch**: Wait for the retro boot sequence.
+2. **Type**: Enter your distress signal.
+3. **Transmit**: Tap `ENCODE & TRANSMIT`.
+4. **Decipher**: Watch the flashing light or listen to the beeps. Use the on-screen key to decode.
+5. **Survive**: Keep an eye on the Sanity Meter. **SHAKE** the device if it hits 0% to restore functionality.
 
 ---
 
@@ -71,102 +101,21 @@
 
 ```
 app/src/main/java/com/example/upsidedown/
-├── MainActivity.kt                 # Entry point + splash navigation
 ├── data/
-│   ├── MorseCodeEncoder.kt         # Text → Morse code
-│   ├── MorseSoundPlayer.kt         # 800Hz beep synthesizer
-│   ├── ShakeDetector.kt            # Accelerometer detection
-│   └── CommunicatorViewModel.kt    # State management
-└── ui/
-    ├── theme/
-    │   ├── Color.kt                # Retro palette (green/amber/red)
-    │   ├── Type.kt                 # Monospace fonts
-    │   └── Theme.kt                # Dark-only theme
-    ├── components/
-    │   ├── CRTOverlay.kt           # Scanline effect
-    │   ├── SanityMeter.kt          # Animated progress bar
-    │   └── SignalDisplay.kt        # Christmas lights alphabet
-    └── screens/
-        ├── SplashScreen.kt         # Animated logo screen
-        └── MainScreen.kt           # Main communicator UI
+│   ├── CommunicatorViewModel.kt    # Core logic: State, Timers, Sanity Drain
+│   ├── MorseCodeEncoder.kt         # Logic: String -> List<SignalUnit>
+│   └── ShakeDetector.kt            # Sensor: Detects physical shaking
+├── ui/
+│   ├── components/
+│   │   ├── SignalDisplay.kt        # UI: The flashing light & Morse legend
+│   │   └── SanityMeter.kt          # UI: Progress bar & corruption effects
+│   └── theme/                      # Styling: Colors, Type, Theme
 ```
-
----
-
-## 🚀 Quick Start
-
-### Build & Run
-```bash
-# Build debug APK
-./gradlew assembleDebug
-
-# Install on connected device
-./gradlew installDebug
-```
-
-### Pre-built APK
-Download `UpsideDownCommunicator.apk` from the repository root.
-
----
-
-## 📖 How to Use
-
-1. **Launch** - Watch the Stranger Things style splash screen
-2. **Type Message** - Enter your message (e.g., "HELP")
-3. **Transmit** - Press "ENCODE & TRANSMIT"
-4. **Watch** - Each letter lights up on the alphabet wall with a beep
-5. **Survive** - Monitor your sanity meter!
-6. **Recover** - If possessed, **shake your phone** to restore sanity
-
----
-
-## 🔑 Morse Code Reference
-
-<details>
-<summary>Click to expand full alphabet</summary>
-
-| Letter | Code | Letter | Code |
-|--------|------|--------|------|
-| A | .- | N | -. |
-| B | -... | O | --- |
-| C | -.-. | P | .--. |
-| D | -.. | Q | --.- |
-| E | . | R | .-. |
-| F | ..-. | S | ... |
-| G | --. | T | - |
-| H | .... | U | ..- |
-| I | .. | V | ...- |
-| J | .--- | W | .-- |
-| K | -.- | X | -..- |
-| L | .-.. | Y | -.-- |
-| M | -- | Z | --.. |
-
-</details>
-
----
-
-## 🔐 Permissions
-
-| Permission | Usage |
-|------------|-------|
-| `VIBRATE` | Haptic feedback on shake recovery |
-
----
-
-## 🎬 Inspiration
-
-Inspired by **Stranger Things Season 1** - the iconic scene where Joyce Byers uses Christmas lights to communicate with Will trapped in the Upside Down.
-
----
-
-## 📄 License
-
-MIT License - Use freely for your own interdimensional communication needs.
 
 ---
 
 <div align="center">
 
-*"Lights. That's how Will communicates."* - Joyce Byers
+*"Friends don't lie... they transmit."*
 
 </div>
