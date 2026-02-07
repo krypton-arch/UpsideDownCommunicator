@@ -1,82 +1,127 @@
-# Upside Down Communicator
+# 🔮 The Upside Down Communicator
 
-A retro-styled crisis communication Android app for transmitting messages when traditional methods fail. Built for scenarios where conventional text-based communication is compromised.
+<div align="center">
 
-## Features
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        T H E
+   U P S I D E
+      D O W N
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     COMMUNICATOR v1.983
+```
 
-### 🔦 Cryptic Transmission Protocol
-- Encodes messages into **Morse code visual signals**
-- Screen flashes dots (short) and dashes (long)
-- No plain text displayed - observers must decode visually
-- Supports A-Z letters and 0-9 numbers
+**A Stranger Things inspired crisis communication app**
+
+*When the lights flicker and the phones go dead, spell out your message the old way.*
+
+</div>
+
+---
+
+## ✨ Features
+
+### 🎄 Christmas Lights Alphabet (Stranger Things Style)
+- **Alphabet wall visualization** - Letters A-Z arranged like Joyce's Christmas lights
+- **Multi-colored bulbs** - Red, Yellow, Green, Blue, Magenta, Orange, Cyan, Pink
+- **Letter-by-letter transmission** - Watch each letter glow as your message is spelled out
+- **Audio beeps** - 800Hz telegraph-style sounds accompany each letter
 
 ### 🧠 Mind Flayer Mode
-- **Sanity Meter**: Drains from 100% to 0% over ~100 seconds
-- **Possessed Mode**: Activates when sanity reaches 0
-  - Screen flips 180° upside down
-  - Visual glitch effects
-  - UI becomes corrupted
-- **Recovery**: Shake device OR wait 30 seconds for auto-recovery
-- Haptic feedback on successful shake
+| Feature | Description |
+|---------|-------------|
+| **Sanity Meter** | Drains 1% per second from 100% → 0% |
+| **Possessed Mode** | Screen flips 180°, UI glitches, red corruption |
+| **Recovery** | Shake device for instant recovery (with vibration) |
+| **Auto-Recovery** | Wait 30 seconds if you can't shake |
 
-### 📺 1983 Hardware Aesthetic
+### 📺 Retro 1983 Aesthetic
 - CRT scanline overlay with subtle flicker
-- Phosphor green (#33FF00) primary color
-- Monospace terminal typography
-- Chunky retro buttons with hard borders
-- No rounded corners or modern effects
+- Phosphor green (#33FF00) terminal colors  
+- Monospace typography throughout
+- Hard-edged buttons (no modern rounded corners)
+- Animated splash screen with glowing logo
 
-## Tech Stack
+---
 
-- **Language**: Kotlin
-- **UI**: Jetpack Compose with Material3
-- **Architecture**: MVVM with StateFlow
-- **Min SDK**: 24 (Android 7.0)
-- **Target SDK**: 36
+## 📱 Screenshots
 
-## Project Structure
+| Splash Screen | Main Interface | Transmitting |
+|---------------|----------------|--------------|
+| Stranger Things style loading | Alphabet wall + Sanity meter | Letters light up sequentially |
+
+---
+
+## 🛠️ Tech Stack
+
+| Component | Technology |
+|-----------|------------|
+| Language | Kotlin |
+| UI Framework | Jetpack Compose + Material3 |
+| Architecture | MVVM with StateFlow |
+| Audio | Synthesized sine wave (no external files) |
+| Min SDK | 24 (Android 7.0) |
+| Target SDK | 36 |
+
+---
+
+## 📁 Project Structure
 
 ```
 app/src/main/java/com/example/upsidedown/
-├── MainActivity.kt              # Entry point, lifecycle management
+├── MainActivity.kt                 # Entry point + splash navigation
 ├── data/
-│   ├── MorseCodeEncoder.kt      # Text to Morse code conversion
-│   ├── ShakeDetector.kt         # Accelerometer shake detection
-│   └── CommunicatorViewModel.kt # State management
+│   ├── MorseCodeEncoder.kt         # Text → Morse code
+│   ├── MorseSoundPlayer.kt         # 800Hz beep synthesizer
+│   ├── ShakeDetector.kt            # Accelerometer detection
+│   └── CommunicatorViewModel.kt    # State management
 └── ui/
     ├── theme/
-    │   ├── Color.kt             # Retro color palette
-    │   ├── Type.kt              # Monospace typography
-    │   └── Theme.kt             # Dark-only theme
+    │   ├── Color.kt                # Retro palette (green/amber/red)
+    │   ├── Type.kt                 # Monospace fonts
+    │   └── Theme.kt                # Dark-only theme
     ├── components/
-    │   ├── CRTOverlay.kt        # Scanline effect
-    │   ├── SanityMeter.kt       # Progress bar with pulse
-    │   └── SignalDisplay.kt     # Morse code flash area
+    │   ├── CRTOverlay.kt           # Scanline effect
+    │   ├── SanityMeter.kt          # Animated progress bar
+    │   └── SignalDisplay.kt        # Christmas lights alphabet
     └── screens/
-        └── MainScreen.kt        # Main communicator UI
+        ├── SplashScreen.kt         # Animated logo screen
+        └── MainScreen.kt           # Main communicator UI
 ```
 
-## Building
+---
 
+## 🚀 Quick Start
+
+### Build & Run
 ```bash
-# Debug build
+# Build debug APK
 ./gradlew assembleDebug
 
 # Install on connected device
 ./gradlew installDebug
 ```
 
-## Usage
+### Pre-built APK
+Download `UpsideDownCommunicator.apk` from the repository root.
 
-1. **Enter Message**: Type your message in the input field (e.g., "SOS")
-2. **Transmit**: Press "ENCODE & TRANSMIT"
-3. **Decode**: Watch the flash pattern
-   - Short flash = Dot (.)
-   - Long flash = Dash (-)
-4. **Survive**: Keep an eye on your sanity meter!
-5. **Recover**: If possessed, shake the device to restore
+---
 
-## Morse Code Reference
+## 📖 How to Use
+
+1. **Launch** - Watch the Stranger Things style splash screen
+2. **Type Message** - Enter your message (e.g., "HELP")
+3. **Transmit** - Press "ENCODE & TRANSMIT"
+4. **Watch** - Each letter lights up on the alphabet wall with a beep
+5. **Survive** - Monitor your sanity meter!
+6. **Recover** - If possessed, **shake your phone** to restore sanity
+
+---
+
+## 🔑 Morse Code Reference
+
+<details>
+<summary>Click to expand full alphabet</summary>
 
 | Letter | Code | Letter | Code |
 |--------|------|--------|------|
@@ -94,10 +139,32 @@ app/src/main/java/com/example/upsidedown/
 | L | .-.. | Y | -.-- |
 | M | -- | Z | --.. |
 
-## Permissions
+</details>
 
-- `VIBRATE` - Haptic feedback on shake recovery
+---
 
-## License
+## 🔐 Permissions
 
-MIT License
+| Permission | Usage |
+|------------|-------|
+| `VIBRATE` | Haptic feedback on shake recovery |
+
+---
+
+## 🎬 Inspiration
+
+Inspired by **Stranger Things Season 1** - the iconic scene where Joyce Byers uses Christmas lights to communicate with Will trapped in the Upside Down.
+
+---
+
+## 📄 License
+
+MIT License - Use freely for your own interdimensional communication needs.
+
+---
+
+<div align="center">
+
+*"Lights. That's how Will communicates."* - Joyce Byers
+
+</div>
