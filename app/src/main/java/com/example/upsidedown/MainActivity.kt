@@ -8,8 +8,10 @@ import android.os.Build
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -18,6 +20,7 @@ import com.example.upsidedown.data.CommunicatorViewModel
 import com.example.upsidedown.data.MorseSoundPlayer
 import com.example.upsidedown.data.ShakeDetector
 import com.example.upsidedown.ui.screens.MainScreen
+import com.example.upsidedown.ui.screens.SplashScreen
 import com.example.upsidedown.ui.theme.UpsidedownTheme
 
 /**
@@ -57,6 +60,9 @@ class MainActivity : ComponentActivity() {
         
         setContent {
             UpsidedownTheme {
+                // Track whether splash is complete
+                var showSplash by remember { mutableStateOf(true) }
+                
                 val communicatorViewModel: CommunicatorViewModel = viewModel()
                 
                 // Set sound player to ViewModel
@@ -73,9 +79,15 @@ class MainActivity : ComponentActivity() {
                     }
                 }
                 
-                MainScreen(
-                    viewModel = communicatorViewModel
-                )
+                if (showSplash) {
+                    SplashScreen(
+                        onSplashComplete = { showSplash = false }
+                    )
+                } else {
+                    MainScreen(
+                        viewModel = communicatorViewModel
+                    )
+                }
             }
         }
     }
