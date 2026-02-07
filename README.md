@@ -15,6 +15,8 @@
 
 *When the lights flicker and the phones go dead, spell out your message the old way.*
 
+### 📥 [Download APK](UpsideDownCommunicator.apk)
+
 </div>
 
 ---
